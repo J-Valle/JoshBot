@@ -1,23 +1,23 @@
-import cats.effect.IOApp
-import config.Config
+import cats.effect._
+import config.{Config, FlywayImplementation, JdbcDatabaseConfig}
+import org.http4s.blaze.server.BlazeServerBuilder
 import pureconfig._
 import pureconfig.generic.auto._
-import cats.effect._
-import org.http4s.blaze.server.BlazeServerBuilder
-
-import scala.concurrent.ExecutionContext.global
 object Main extends IOApp {
-//  def main(args: Array[String]): Unit = {
-//    println("Hello world")
-//    ConfigSource.default.loadOrThrow[Config]
-//  }
+
   val routes = new HttpRoutes
-  def run(args: List[String]): IO[ExitCode] =
-    BlazeServerBuilder[IO]
-      .bindHttp(8080, "localhost")
-      .withHttpApp(routes.helloWorldService.orNotFound)
-      .serve
-      .compile
-      .drain
-      .as(ExitCode.Success)
+  def run(args: List[String]): IO[ExitCode] = {
+    for {
+      config <- IO.delay(ConfigSource.default.loadOrThrow[Config])
+      _ <- FlywayImplementation.migrate[IO](config.exampleJdbc)
+      _ <- BlazeServerBuilder[IO]
+        .bindHttp(8080, "localhost")
+        .withHttpApp(routes.helloWorldService.orNotFound)
+        .serve
+        .compile
+        .drain
+    } yield ExitCode.Success
+
+  }
+
 }
