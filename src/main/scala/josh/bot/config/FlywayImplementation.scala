@@ -1,4 +1,4 @@
-package config
+package josh.bot.config
 
 import cats.effect.Sync
 import cats.implicits._

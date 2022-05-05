@@ -1,3 +1,5 @@
+package josh.bot
+
 import cats.effect._
 import org.http4s
 import org.http4s._

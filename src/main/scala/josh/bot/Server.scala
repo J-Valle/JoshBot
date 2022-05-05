@@ -1,6 +1,9 @@
-import cats.effect.{ExitCode, IO, Temporal}
-import config.{Config, FlywayImplementation}
+package josh.bot
+
+import cats.effect._
 import fs2.Stream
+import josh.bot.telegram.TelegramClient
+import josh.bot.config.{Config, FlywayImplementation}
 import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.ember.client.EmberClientBuilder
 import pureconfig.ConfigSource
@@ -13,7 +16,7 @@ class Server(implicit T: Temporal[IO]) {
 
   def serve: Stream[IO, ExitCode] = for {
     config <- Stream.eval(IO.delay(ConfigSource.default.loadOrThrow[Config]))
-    _ <- Stream.eval(FlywayImplementation.migrate[IO](config.exampleJdbc))
+    _ <- Stream.eval(FlywayImplementation.migrate[IO](config.jdbc))
     client <- Stream.resource(EmberClientBuilder.default[IO].build)
     telegramClient = new TelegramClient (client, config)
     _ <- BlazeServerBuilder[IO]
