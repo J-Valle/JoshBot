@@ -1,4 +1,4 @@
-package config
+package josh.bot.config
 
 final case class JdbcDatabaseConfig(
   driver: String,
@@ -9,5 +9,5 @@ final case class JdbcDatabaseConfig(
 
 case class Config (
     telegramToken : String,
-    exampleJdbc : JdbcDatabaseConfig
+    jdbc : JdbcDatabaseConfig
 )
