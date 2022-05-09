@@ -25,7 +25,8 @@ class Server(implicit T: Temporal[IO]) {
       .serve
       .concurrently(
         Stream.sleep(1.second) >> Stream.eval(
-          telegramClient.serverContact
+          telegramClient.serverContact >> telegramClient.messageTest(32478755, TelegramBotMessage.randomMessage)
+
         )
       )
   } yield ExitCode.Success
