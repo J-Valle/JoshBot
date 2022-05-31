@@ -14,15 +14,15 @@ class TelegramClient (client: Client[IO], config: Config) {
   val baseUri: Uri = uri"https://api.telegram.org" / s"bot${config.telegramToken}"
   def serverContact: IO[Unit] =
     client
-      .expect[TelegramResult]( baseUri / "getUpdates")
+      .expect[TelegramResult[List[TelegramUpdate]]]( baseUri / "getUpdates")
       .map(res => println(res))
 
   def messageTest(chatId: Long, text: String): IO[Unit] =
     {
 
       client
-        .expect[Json]((baseUri / "sendMessage").withQueryParam("chat_id", chatId).withQueryParam("text",text ))
-        .map(res => println(res.spaces2))
+        .expect[TelegramResult[Json]]((baseUri / "sendMessage").withQueryParam("chat_id", chatId).withQueryParam("text",text ))
+        .map(res =>if(res.ok)() else println(res.result.spaces2))
     }
 
 }

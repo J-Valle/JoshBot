@@ -66,11 +66,12 @@ object TelegramUpdate {
   implicit val codec: Codec[TelegramUpdate] = deriveConfiguredCodec
 }
 
-case class TelegramResult(
+case class TelegramResult[A](
     ok: Boolean,
-    result: List[TelegramUpdate]
+    result: A
 )
 
 object TelegramResult {
-  implicit val codec: Codec[TelegramResult] = deriveConfiguredCodec
+  implicit val jsonCodec: Codec[TelegramResult[Json]] = deriveConfiguredCodec
+  implicit val updateCodec: Codec[TelegramResult[List[TelegramUpdate]]] = deriveConfiguredCodec
 }

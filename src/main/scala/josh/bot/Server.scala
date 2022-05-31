@@ -4,6 +4,7 @@ import cats.effect._
 import fs2.Stream
 import josh.bot.telegram.TelegramClient
 import josh.bot.config.{Config, FlywayImplementation}
+import josh.bot.core.MessageProcess
 import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.ember.client.EmberClientBuilder
 import pureconfig.ConfigSource
@@ -19,15 +20,13 @@ class Server(implicit T: Temporal[IO]) {
     _ <- Stream.eval(FlywayImplementation.migrate[IO](config.jdbc))
     client <- Stream.resource(EmberClientBuilder.default[IO].build)
     telegramClient = new TelegramClient (client, config)
+    messageProcess = new MessageProcess (telegramClient)
     _ <- BlazeServerBuilder[IO]
       .bindHttp(8080, "localhost")
       .withHttpApp(routes.helloWorldService.orNotFound)
       .serve
       .concurrently(
-        Stream.sleep(1.second) >> Stream.eval(
-          telegramClient.serverContact >> telegramClient.messageTest(32478755, TelegramBotMessage.randomMessage)
-
-        )
+        Stream.sleep(1.second) >> messageProcess.process
       )
   } yield ExitCode.Success
 
