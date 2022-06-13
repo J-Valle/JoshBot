@@ -3,7 +3,7 @@ import scala.util.Random
 
 object TelegramBotMessage {
 def randomMessage: String ={
-  val nRNG = Random.nextInt(3)
+  val nRNG = Random.nextInt(4)
   if (nRNG == 0) {
     "Veo cero carajos"
   }
