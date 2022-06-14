@@ -18,7 +18,8 @@ class MessageProcess(telegramClient: TelegramClient) {
     streamProcess[List[TelegramUpdate]](lastUpdateId =>
       telegramClient.serverContact.map{result =>
         //handle empty list
-      val newLastUpdateId = result.result.map(_.updateId).max//maxBy(update => update.updateId).updateId
+      val newLastUpdateId = List.empty[TelegramUpdate].map(_.updateId).maxOption.getOrElse(lastUpdateId)
+        //maxBy(update => update.updateId).updateId
         //result.result.map(_.updateId).max
         //List.empty[TelegramUpdate].map(_.updateId).max
       val filteredUpdates = result.result.filter(_.updateId > lastUpdateId)
