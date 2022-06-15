@@ -14,7 +14,7 @@ class MessageProcess(
     persistenceService: PersistenceService
 ) {
 
-  def process[TelegramClient]: Stream[IO, Unit] =
+  def process: Stream[IO, Unit] =
     //call serverContact
     //use lastUpdateId to discard old messages
     //return the telegramUpdate list with the new latest updateId
@@ -29,12 +29,7 @@ class MessageProcess(
       }
     )
       .flatMap(result => Stream.emits(result))
-      .evalMap(update =>
-        for {
-          factMessage <- persistenceService.getFact
-          newFactMessage <- telegramClient
-            .messageTest(update.message.chat.id, factMessage)
-        } yield newFactMessage
+      .evalMap(update => telegramFunction(update)
       )
 
   def streamProcess[A](getUpdates: Long => IO[(Long, A)]): Stream[IO, A] =
@@ -44,5 +39,19 @@ class MessageProcess(
         getUpdates(startPoint)
       }
       .map(_._2)
+
+  def telegramFunction(update: TelegramUpdate): IO[Unit] = {
+
+    update.message.text match{
+      case text if text.startsWith("/curiosidad") =>
+        for {
+          factMessage <- persistenceService.getFact
+          newFactMessage <- telegramClient
+            .messageTest(update.message.chat.id, factMessage)
+        } yield newFactMessage
+      case invalidText => telegramClient.messageTest(update.message.chat.id, s"$invalidText no es un comando aceptado." )
+    }
+
+  }
 
 }
