@@ -11,9 +11,9 @@ class PersistenceService(ta: Transactor[IO]) {
   def getFact: IO[String] = {
     {
       for {
-        dbValue <- Queries.dbCount.unique
-        nRNG = Random.nextInt(dbValue)
-        fact <- Queries.chosenFact(nRNG).unique
+        dbValue <- CurioQueries.dbCount.unique
+        nRNG = Random.nextLong(dbValue)
+        fact <- CurioQueries.chosenFact(nRNG).unique
       } yield fact
     }.transact(ta)
 
