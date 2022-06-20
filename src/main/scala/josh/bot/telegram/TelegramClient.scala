@@ -11,11 +11,11 @@ import org.http4s.circe.CirceEntityCodec._
 class TelegramClient (client: Client[IO], config: Config) {
 
   val baseUri: Uri = uri"https://api.telegram.org" / s"bot${config.telegramToken}"
-  def serverContact: IO[TelegramResult[List[TelegramUpdate]]] =
+  def getUpdates: IO[TelegramResult[List[TelegramUpdate]]] =
     client
       .expect[TelegramResult[List[TelegramUpdate]]]( baseUri / "getUpdates")
 
-  def messageTest(chatId: Long, text: String): IO[Unit] =
+  def sendMessage(chatId: Long, text: String): IO[Unit] =
     {
       client
         .expect[TelegramResult[Json]]((baseUri / "sendMessage").withQueryParam("chat_id", chatId).withQueryParam("text",text ))
