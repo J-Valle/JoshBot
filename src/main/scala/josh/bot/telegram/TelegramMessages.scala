@@ -11,9 +11,8 @@ case class TelegramMessageFrom(
     username: Option[String],
     languageCode: String
 )
-
 object TelegramMessageFrom {
-  implicit val codec: Codec[TelegramMessageFrom] = deriveConfiguredCodec
+  implicit val codec: Decoder[TelegramMessageFrom] = deriveConfiguredDecoder
 }
 
 case class TelegramMessageChat(
@@ -23,7 +22,6 @@ case class TelegramMessageChat(
     username: Option[String],
     chatType: String
 )
-
 object TelegramMessageChat {
   implicit val encoder: Encoder[TelegramMessageChat] =
     Encoder
@@ -44,17 +42,56 @@ object TelegramMessageChat {
     "type"
   )(TelegramMessageChat.apply)
 }
+object TelegramMessageVideoThumb {
+  implicit val codec: Decoder[TelegramMessageVideoThumb] = deriveConfiguredDecoder
+}
+case class TelegramMessageVideoThumb(
+  fileId: String,
+  fileUniqueId: String,
+  fileSize: Long,
+  width: Int,
+  height: Int
+)
+object TelegramMessageVideo {
+  implicit val codec: Decoder[TelegramMessageVideo] = deriveConfiguredDecoder
+}
+case class TelegramMessageVideo(
+  duration: Int,
+  width: Int,
+  height: Int,
+  mimeType: String,
+  thumb: TelegramMessageVideoThumb,
+  fileId: String,
+  fileUniqueId: String,
+  fileSize: Long
+)
+object TelegramMessageImage {
+  implicit val codec: Decoder[TelegramMessageImage] = deriveConfiguredDecoder
+}
+case class TelegramMessageImage(
+  fileId: String,
+  fileUniqueId: String,
+  fileSize: Long,
+  width: Int,
+  height: Int
+)
 
 case class TelegramMessage(
     messageId: Long,
     from: TelegramMessageFrom,
     chat: TelegramMessageChat,
     date: Long,
-    text: String
-)
+    text: Option[String],
+    photo: List[TelegramMessageImage],
+    video: Option[TelegramMessageVideo]
+){
+  def isAPicture: Boolean = photo.nonEmpty
+}
 
 object TelegramMessage {
-  implicit val codec: Codec[TelegramMessage] = deriveConfiguredCodec
+  implicit def listDecoder[A: Decoder]: Decoder[List[A]] =
+    Decoder.decodeOption(Decoder.decodeList[A]).map(_.getOrElse(Nil))
+  implicit val codec: Decoder[TelegramMessage] = deriveConfiguredDecoder
 }
 
 case class TelegramUpdate(
@@ -63,7 +100,7 @@ case class TelegramUpdate(
 )
 
 object TelegramUpdate {
-  implicit val codec: Codec[TelegramUpdate] = deriveConfiguredCodec
+  implicit val codec: Decoder[TelegramUpdate] = deriveConfiguredDecoder
 }
 
 case class TelegramResult[A](
@@ -72,6 +109,7 @@ case class TelegramResult[A](
 )
 
 object TelegramResult {
-  implicit val jsonCodec: Codec[TelegramResult[Json]] = deriveConfiguredCodec
-  implicit val updateCodec: Codec[TelegramResult[List[TelegramUpdate]]] = deriveConfiguredCodec
+  implicit val jsonCodec: Decoder[TelegramResult[Json]] = deriveConfiguredDecoder
+  implicit val updateCodec: Decoder[TelegramResult[List[TelegramUpdate]]] =
+    deriveConfiguredDecoder
 }

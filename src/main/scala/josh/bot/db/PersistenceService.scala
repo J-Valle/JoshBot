@@ -16,7 +16,6 @@ class PersistenceService(ta: Transactor[IO]) {
         fact <- CurioQueries.chosenFact(nRNG).unique
       } yield fact
     }.transact(ta)
-
   }
 
 }
