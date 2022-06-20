@@ -18,11 +18,14 @@ libraryDependencies ++= Seq(
   "org.http4s" %% "http4s-dsl" % http4sVersion,
   "org.http4s" %% "http4s-ember-server" % http4sVersion,
   "org.http4s" %% "http4s-ember-client" % http4sVersion,
-  "org.typelevel" %% "munit-cats-effect-3" % "1.0.7" % Test,
   "io.circe" %% "circe-core" % circeVersion,
   "io.circe" %% "circe-generic" % circeVersion,
   "io.circe" %% "circe-generic-extras" % circeVersion,
-  "org.tpolecat" %% "doobie-postgres"  % "1.0.0-RC1",
+  "org.tpolecat" %% "doobie-postgres" % "1.0.0-RC1",
   "org.tpolecat" %% "doobie-core" % "1.0.0-RC1",
-  "org.tpolecat" %% "doobie-munit"   % "1.0.0-RC1" % Test
+  "org.tpolecat" %% "doobie-munit" % "1.0.0-RC1" % Test,
+  "org.typelevel" %% "munit-cats-effect-3" % "1.0.7" % Test,
+  "com.dimafeng" %% "testcontainers-scala-munit" % "0.40.3" % Test,
+  "com.dimafeng" %% "testcontainers-scala-postgresql" % "0.40.3" % Test,
+  "io.circe" %% "circe-literal" % "0.14.1" % Test
 )

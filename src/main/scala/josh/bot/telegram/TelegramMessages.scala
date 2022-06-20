@@ -7,8 +7,8 @@ case class TelegramMessageFrom(
     id: Long,
     isBot: Boolean,
     firstName: String,
-    lastName: String,
-    username: String,
+    lastName: Option[String],
+    username: Option[String],
     languageCode: String
 )
 
@@ -19,8 +19,8 @@ object TelegramMessageFrom {
 case class TelegramMessageChat(
     id: Long,
     firstName: String,
-    lastName: String,
-    username: String,
+    lastName: Option[String],
+    username: Option[String],
     chatType: String
 )
 
@@ -66,11 +66,12 @@ object TelegramUpdate {
   implicit val codec: Codec[TelegramUpdate] = deriveConfiguredCodec
 }
 
-case class TelegramResult(
+case class TelegramResult[A](
     ok: Boolean,
-    result: List[TelegramUpdate]
+    result: A
 )
 
 object TelegramResult {
-  implicit val codec: Codec[TelegramResult] = deriveConfiguredCodec
+  implicit val jsonCodec: Codec[TelegramResult[Json]] = deriveConfiguredCodec
+  implicit val updateCodec: Codec[TelegramResult[List[TelegramUpdate]]] = deriveConfiguredCodec
 }
