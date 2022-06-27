@@ -4,9 +4,9 @@ import cats.effect.IO
 import io.circe.Json
 import josh.bot.config.Config
 import org.http4s.Uri
+import org.http4s.circe.CirceEntityCodec._
 import org.http4s.client.Client
 import org.http4s.implicits._
-import org.http4s.circe.CirceEntityCodec._
 
 class TelegramClient (client: Client[IO], config: Config) {
 

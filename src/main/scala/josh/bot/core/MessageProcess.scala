@@ -2,13 +2,11 @@ package josh.bot.core
 
 import cats.effect.IO
 import fs2.Stream
-import io.circe.Json
 import josh.bot.db.PersistenceService
 import josh.bot.telegram._
-import org.http4s.Uri
-import org.http4s.implicits.http4sLiteralsSyntax
 
 import scala.concurrent.duration.DurationInt
+
 class MessageProcess(
     telegramClient: TelegramClient,
     persistenceService: PersistenceService
@@ -27,13 +25,19 @@ class MessageProcess(
       .flatMap(result => Stream.emits(result))
       .evalMap(update => telegramFunction(update))
 
-  def streamProcess[A](getUpdates: Long => IO[(Long, A)]): Stream[IO, A] =
-    Stream
-      .awakeDelay[IO](2.seconds)
-      .evalMapAccumulate(0L) { (startPoint, _) =>
-        getUpdates(startPoint)
-      }
-      .map(_._2)
+  def streamProcess[A](getUpdates: Long => IO[(Long, A)]): Stream[IO, A] = {
+    for {
+      updateTimer <- Stream.eval(persistenceService.callTimer)
+
+      updatedStream <- Stream
+        .awakeDelay[IO](2.seconds)
+        .evalMapAccumulate(updateTimer) { (startPoint, _) =>
+          getUpdates(startPoint)
+        }
+      _ <- Stream.eval(persistenceService.updateTimer(updatedStream._1))
+    } yield updatedStream._2
+
+  }
 
   def telegramFunction(update: TelegramUpdate): IO[Unit] = {
     (update.message.text, update.message.photo, update.message.video) match {
@@ -53,7 +57,18 @@ class MessageProcess(
           newFactMessage <- telegramClient
             .sendMessage(update.message.chat.id, factMessage)
         } yield newFactMessage
-      case invalidValue =>
+      case (Some(text), _, _) if text.startsWith("/start") =>
+        for {
+          userIdGet <- persistenceService
+            .registerUser(update.message.from.id, update.message.from.username)
+            .void
+          _ <- telegramClient.sendMessage(
+            update.message.chat.id,
+            "Hey, me llamo JoshBot, un placer"
+          )
+        } yield userIdGet
+
+      case _ =>
         telegramClient.sendMessage(
           update.message.chat.id,
           FillerMessage.boringResponse

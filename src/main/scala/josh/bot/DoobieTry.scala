@@ -1,17 +1,11 @@
 package josh.bot
 
-import pureconfig.generic.auto._
+import cats.effect._
 import doobie._
 import doobie.implicits._
-import cats._
-import cats.effect._
-import cats.implicits._
-import doobie.util.ExecutionContexts
-import cats.effect.unsafe.implicits.global
-import doobie.util.transactor.Transactor.Aux
-import fs2.Stream
 import josh.bot.config.{Config, JdbcDatabaseConfig}
 import pureconfig.ConfigSource
+import pureconfig.generic.auto._
 
 object DoobieTry extends IOApp.Simple {
   def createTransactor(config: JdbcDatabaseConfig): Transactor[IO] =
