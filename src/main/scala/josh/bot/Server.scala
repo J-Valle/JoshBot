@@ -3,10 +3,10 @@ package josh.bot
 import cats.effect._
 import doobie.Transactor
 import fs2.Stream
-import josh.bot.telegram.TelegramClient
-import josh.bot.config.{Config, FlywayImplementation, JdbcDatabaseConfig}
+import josh.bot.config._
 import josh.bot.core.MessageProcess
 import josh.bot.db.PersistenceService
+import josh.bot.telegram.TelegramClient
 import org.http4s.blaze.server.BlazeServerBuilder
 import org.http4s.ember.client.EmberClientBuilder
 import pureconfig.ConfigSource
@@ -33,6 +33,7 @@ class Server(implicit T: Temporal[IO]) {
     persistenceTransactor = createTransactor(config.jdbc)
     persistenceService = new PersistenceService(persistenceTransactor)
     messageProcess = new MessageProcess (telegramClient, persistenceService)
+    _ = println("Bot activo")
     _ <- BlazeServerBuilder[IO]
       .bindHttp(8080, "localhost")
       .withHttpApp(routes.helloWorldService.orNotFound)
