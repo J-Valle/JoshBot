@@ -41,7 +41,7 @@ class MessageProcess(
 
   def telegramFunction(update: TelegramUpdate): IO[Unit] = {
     (update.message.text, update.message.photo, update.message.video) match {
-      case (_, _, Some(video)) =>
+      case (_, _, Some(_)) =>
         telegramClient.sendMessage(
           update.message.chat.id,
           VideoCommentary.videoResponse
@@ -57,6 +57,7 @@ class MessageProcess(
           newFactMessage <- telegramClient
             .sendMessage(update.message.chat.id, factMessage)
         } yield newFactMessage
+
       case (Some(text), _, _) if text.startsWith("/start") =>
         for {
           userIdGet <- persistenceService
@@ -66,6 +67,36 @@ class MessageProcess(
             update.message.chat.id,
             "Hey, me llamo JoshBot, un placer"
           )
+        } yield userIdGet
+
+     case (Some(text), _, _) if text.startsWith("/favorito") =>
+       telegramClient.sendMessage(update.message.chat.id, "Ok, parte que no te he dicho, ponme que género quieres añadir, como por ejemplo /favorito Historia... y escríbemelo bien, que no son ganas de repetirme.")
+         val textList = text.split(" ").toList.tail
+         val genreList = List("Historia", "Vida", "Videojuegos", "Random")
+       textList match {
+         case genre :: Nil if genreList.contains(genre) =>
+           for {
+             newFave <- persistenceService.changeFave(fave = true, genre, update.message.from.id)
+           } yield newFave
+         case _ => telegramClient.sendMessage(update.message.chat.id, "Escríbeme bien las cosas, tuso.")
+       }
+
+      case (Some(text), _, _) if text.startsWith("/banear") =>
+        telegramClient.sendMessage(update.message.chat.id, "Ok, parte que no te he dicho, ponme que género quieres añadir, como por ejemplo /banear Historia... y escríbemelo bien, que no hay ganas de repetirme.")
+        val textList = text.split(" ").toList.tail
+        val genreList = List("Historia", "Vida", "Videojuegos", "Random")
+        textList match {
+          case genre :: Nil if genreList.contains(genre) =>
+          for {
+            newBan <- persistenceService.changeBans(banned = true, genre, update.message.from.id)
+          } yield newBan
+          case _ => telegramClient.sendMessage(update.message.chat.id, "Escríbeme bien las cosas, tuso.")
+        }
+
+      case (Some(text), _, _) if text.startsWith("/mostrar_preferencias") =>
+        for {
+          userIdGet <- persistenceService.preferenceCheck(update.message.chat.id)
+          _ <- telegramClient.sendMessage(update.message.chat.id, "Ok, aqui tienes la lista tusín.")
         } yield userIdGet
 
       case _ =>
