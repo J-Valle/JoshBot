@@ -30,4 +30,13 @@ class PersistenceService(ta: Transactor[IO]) {
 
   val callTimer: IO[Long] = TimeUpdateQuery.getTime.unique.transact(ta)
 
+  def changeBans(banned: Boolean, genre : String, users : Long): IO[Int] = {
+    preferenceQuery.bannedQuery(banned, genre, users).run.transact(ta)
+  }
+  def changeFave(fave : Boolean,genre : String, users : Long): IO[Int] = {
+    preferenceQuery.favoriteQuery(fave, genre, users).run.transact(ta)
+  }
+ def preferenceCheck(users: Long): IO[List[(Boolean, Boolean)]] = {
+   preferenceQuery.preferenceCheckQuery(users).to[List].transact(ta)
+ }
 }
