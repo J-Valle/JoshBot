@@ -9,11 +9,12 @@ import scala.util.Random
 
 class PersistenceService(ta: Transactor[IO]) {
 
-  def getFact: IO[String] = {
+  def getFact(telegramUserId : Long): IO[String] = {
     for {
       dbValue <- CurioQueries.dbCount.unique
       nRNG = Random.nextLong(dbValue)
-      fact <- CurioQueries.chosenFact(nRNG).unique
+      userId <- getUserId(telegramUserId).unique
+      fact <- CurioQueries.chosenFact(nRNG,userId).unique
     } yield fact
   }.transact(ta)
 

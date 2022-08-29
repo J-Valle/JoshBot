@@ -53,7 +53,7 @@ class MessageProcess(
         )
       case (Some(text), _, _) if text.startsWith("/curiosidad") =>
         for {
-          factMessage <- persistenceService.getFact
+          factMessage <- persistenceService.getFact(update.message.from.id)
           newFactMessage <- telegramClient
             .sendMessage(update.message.chat.id, factMessage)
         } yield newFactMessage
