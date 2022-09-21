@@ -96,8 +96,11 @@ object TelegramMessage {
 
 case class TelegramUpdate(
     updateId: Long,
-    message: TelegramMessage
-)
+    message: Option[TelegramMessage],
+    editedMessage: Option[TelegramMessage]
+){
+  def getMessage = message.orElse(editedMessage)
+}
 
 object TelegramUpdate {
   implicit val codec: Decoder[TelegramUpdate] = deriveConfiguredDecoder
